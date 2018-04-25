@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>CS 4621: Final Project</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/cs4620.css" rel="stylesheet">
+    <link href="css/jquery-ui.min.css" rel="stylesheet">
+    <link href="css/jquery-ui.theme.min.css" rel="stylesheet">
+    <link href="css/jquery-ui.structure.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1>CS 4621 Final Project: <span class="subtitle">Audio Visualizer</span></h1>
+
+    <div align="center">
+        <canvas tabindex="1" id="webglCanvas" style="border: none; background-color: black;" width="800" height="600"></canvas>
+    </div>
+
+
+    <table class="table table-bordered">
+            <tr>
+                <td colspan="1" align="center"><b><h3>Audio File</h3></b></td>
+                <td colspan="1" align="center"><b><h3>Mesh File</h3></b></td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <input type="file" onchange="loadAudioFile(event)"></h3>
+                    <audio id="user-audio" controls></audio>
+                </td>
+                <td align="center">
+                    <input type="file" onchange="loadMeshFile(event)">
+                </td>
+            </tr>
+            <!-- <tr>
+                <td colspan="2" align="center">
+                    <button><h4>Play!</h4></button>
+                </td>
+            </tr> -->
+    </table>
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="./js/jquery-3.1.1.min.js"></script>
+<script src="./js/jquery-ui.min.js"></script>
+<script src="./js/gl-matrix-min.js"></script>
+<script src="./js/preloadjs-0.6.2.min.js"></script>
+<script src="./webgl.js"></script>
+<script src="./audio.js"></script>
+<script src="./interaction.js"></script>
+
+<!--*************************************************************************-->
+<!--*************************** VERTEX SHADER *******************************-->
+<!--*************************************************************************-->
+<script id="vertexShader" type="x-shader/x-vertex">
+    attribute vec3 vert_position;
+
+    uniform mat4 projection;
+    uniform mat4 modelView;
+    
+    void main() {
+        gl_Position = projection * modelView * vec4(vert_position, 1.0);
+    }
+</script>
+
+<!--*************************************************************************-->
+<!--************************** FRAGMENT SHADER ******************************-->
+<!--*************************************************************************-->
+<script id="fragmentShader" type="x-shader/x-fragment">
+    precision highp float;
+
+    uniform float size;
+
+    void main() {
+        gl_FragColor = vec4(1,1,1,1);
+    }
+</script>
+
+<!--*************************************************************************-->
+<!--**************************** MAIN SCRIPT ********************************-->
+<!--*************************************************************************-->
+<script>
+    function startWebGL(event) {
+        runWebGL(loadMeshFile(event));
+    }
+
+    function createShape(gl, vertices, indices) {
+        var shape = {};
+
+        shape.vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        shape.indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+        shape.vertLen = vertices.length;
+        shape.indxLen = indices.length;
+        return shape;
+    }
+    function drawShape(gl, program, shape, xf, proj, FFTarr) {
+        gl.useProgram(program);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
+        var positionLocation = gl.getAttribLocation(program, "vert_position");
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 4*3, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.indexBuffer);
+        gl.drawElements(gl.LINE_STRIP, shape.indxLen, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelView"), false, xf);
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "projection"), false, proj);
+
+        gl.useProgram(null);
+    }
+
+    function glEnv(canvas) {
+
+        var gl = initializeWebGL(canvas);
+        gl.enable(gl.DEPTH_TEST);
+        var program = createGlslProgram(gl, "vertexShader", "fragmentShader");
+        var shape;
+
+        // create the setter functions
+        var mesh = {};
+        function setMesh(newMesh) {
+            mesh = newMesh;
+        }
+
+        var xf = mat4.create();
+        function setXf(newXf) {
+            mat4.copy(xf, newXf);
+        }
+
+        var proj = mat4.create();
+        function setProj(newProj) {
+            mat4.copy(proj, newProj);
+        }
+
+        function drawFrame(FFTarr) {
+            if (mesh == null) { return; }
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            var ar = transform(mesh, FFTarr);
+            shape = createShape(gl, ar, mesh.v_indices);
+            drawShape(gl, program, shape, xf, proj, FFTarr);
+        }
+
+        return {
+            program: program,
+            setMesh: setMesh,
+            setXf: setXf,
+            setProj: setProj,
+            drawFrame: drawFrame,
+        }
+    }
+
+    // set up the analyzer node to perform FFT
+    var analyser = initializeAnalyzer(document.querySelector("audio"), 128, 0.5);
+
+    // create projection and MV matricies
+    var xf = mat4.create();
+    mat4.lookAt(xf, [2.0, 1.0, 2.0],  [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
+
+    var proj = mat4.create();
+    mat4.perspective(proj, 1.5472, 800.0/600.0, 0.1, 1000);
+
+    function runWebGL(mesh) {
+        // create the GL enviornment
+        var webglCanvas = glEnv($("#webglCanvas"));
+
+        webglCanvas.setMesh(mesh);
+        webglCanvas.setProj(proj);
+        webglCanvas.setXf(xf);
+
+        function updateWebGL() {
+            var FFT = getNormalizedFFT(analyser);
+            webglCanvas.drawFrame(FFT);
+            window.requestAnimationFrame(updateWebGL);
+        }
+        window.requestAnimationFrame(updateWebGL);
+    }
+
+    // startWebGL();
+</script>
+
+</body>
+</html>
