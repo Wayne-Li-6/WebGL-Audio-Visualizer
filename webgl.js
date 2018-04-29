@@ -63,18 +63,66 @@ function createGlslProgram(gl, vertexShaderId, fragmentShaderId) {
 }
 
 /**
- * Function to modify the mesh vertices and translate their positions in the 
+ * Creates the shape object that is to be drawn; creates the vertex buffer from
+ * [vertices] as well as the line index buffer from [line_indices]. These help
+ * to specify which pair of vertices need to have an edge draw between them.
+ */
+function createShape(gl, vertices, line_indices) {
+    var shape = {};
+
+    shape.vertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    shape.triangleLineIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleLineIndexBuffe);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(line_indices), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+    shape.vertLen = vertices.length;
+    shape.idxLen = line_indices.length;
+    return shape;
+}
+
+/**
+ * This function draws the [shape] to the canvas using the shaders specified by
+ * [program]. Also sets the model-view matrix [xf] and the projection matrix
+ * [proj] as uniform variables in the fragment shader.
+ */
+function drawShape(gl, program, shape, xf, proj) {
+    gl.useProgram(program);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
+    var positionLocation = gl.getAttribLocation(program, "vert_position");
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 4*3, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleIndexBuffer);
+    gl.drawElements(gl.LINES, shape.idxLen, gl.UNSIGNED_SHORT, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelView"), false, xf);
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "projection"), false, proj);
+
+    gl.useProgram(null);
+}
+
+/**
+ * Function to modify the [mesh] vertices and translate their positions in the 
  * direction specified by their normals. The amount translated depends on the
- * vertex's associated frequency bin in the FFT.
+ * vertex's associated frequency bin in the [FFT] array.
  */
 function transform(mesh, FFT) {
     var vertices = mesh.vertices.slice();
-    for (var i = 0; i < mesh.n_indices.length; i++) {
-        var normal = mesh.normals.slice(3*mesh.n_indices[i], 3*mesh.n_indices[i]+3);
-        if (FFT[i] > 0){
-            vertices[3*mesh.v_indices[i]] += FFT[i] * mesh.normals[mesh.n_indices[i]];
-            vertices[3*mesh.v_indices[i]+1] += FFT[i] * mesh.normals[mesh.n_indices[i]+1];
-            vertices[3*mesh.v_indices[i]+2] += FFT[i] * mesh.normals[mesh.n_indices[i]+2];
+    for (var i = 0; i < vertices.length; i+=3) {
+        var normal_idx = mesh.vertex_to_normal.get(i/3) * 3;
+        var fft_idx = (i/3);
+        if (FFT[fft_idx] > 0) {
+            vertices[i] += FFT[fft_idx] * mesh.normals[normal_idx];
+            vertices[i+1] += FFT[fft_idx] * mesh.normals[normal_idx+1];
+            vertices[i+2] += FFT[fft_idx] * mesh.normals[normal_idx+2];
         }
     }
     return vertices;

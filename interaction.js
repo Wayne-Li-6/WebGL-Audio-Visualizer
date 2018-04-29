@@ -25,14 +25,14 @@ function loadAudioFile(file) {
 /**
  * Takes in a string representation of an obj file and creates the 
  * associated mesh; contains vertices, normals, and the indices of each vertex 
- * and noramal in a triangle. Also contains the number of samples for the FFT
+ * and normals in a triangle. Also contains the number of samples for the FFT
  * as the next power of 2 >= to the number of vertices.
  */
 function createMesh(text) {
     var vertices = [];
-    var v_indices = [];
     var normals = [];
-    var n_indices = [];
+    var triangle_line_indices = [];
+    var vertex_to_normal = new Map();
     var n = 0;
 
     var all_lines = text.split("\n");
@@ -51,11 +51,21 @@ function createMesh(text) {
                 normals.push(parseFloat(line[3]));
                 break;
             case 'f':
-                for (var j = 1; j <= 3; j++) {
-                    var idx = line[j].split("/");
-                    v_indices.push(parseInt(idx[0]));
-                    n_indices.push(parseInt(idx[1]));
-                }
+                var idx1 = line[1].split("//");             // v1
+                var idx2 = line[2].split("//");             // v2
+                var idx3 = line[3].split("//");             // v3
+                // map v1 -> n1
+                vertex_to_normal.set(parseInt(idx1[0]), parseInt(idx1[1]));     
+                // map v2 -> n2
+                vertex_to_normal.set(parseInt(idx2[0]), parseInt(idx2[1]));     
+                // map v3 -> n3
+                vertex_to_normal.set(parseInt(idx3[0]), parseInt(idx3[1]));     
+                // edge (v1,v2)
+                triangle_line_indices.push(parseInt(idx1[0]),parseInt(idx2[0]));
+                // edge (v2,v3)
+                triangle_line_indices.push(parseInt(idx2[0]),parseInt(idx3[0]));
+                // edge (v3,v1)
+                triangle_line_indices.push(parseInt(idx3[0]),parseInt(idx1[0]));
                 break;
         }
     }
@@ -63,8 +73,8 @@ function createMesh(text) {
     return {
         sample_number: Math.pow(2,n),
         vertices: vertices,
-        v_indices: v_indices,
         normals: normals,
-        n_indices: n_indices
+        triangle_line_indices: triangle_line_indices,
+        vertex_to_normal: vertex_to_normal
     };
 }

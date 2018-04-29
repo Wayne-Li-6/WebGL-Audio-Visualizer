@@ -88,43 +88,6 @@
     function startWebGL(event) {
         runWebGL(loadMeshFile(event));
     }
-
-    function createShape(gl, vertices, indices) {
-        var shape = {};
-
-        shape.vertexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-        shape.indexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.indexBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-        shape.vertLen = vertices.length;
-        shape.indxLen = indices.length;
-        return shape;
-    }
-    function drawShape(gl, program, shape, xf, proj, FFTarr) {
-        gl.useProgram(program);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
-        var positionLocation = gl.getAttribLocation(program, "vert_position");
-        gl.enableVertexAttribArray(positionLocation);
-        gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 4*3, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.indexBuffer);
-        gl.drawElements(gl.LINE_STRIP, shape.indxLen, gl.UNSIGNED_SHORT, 0);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelView"), false, xf);
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, "projection"), false, proj);
-
-        gl.useProgram(null);
-    }
-
     function glEnv(canvas) {
 
         var gl = initializeWebGL(canvas);
@@ -152,9 +115,9 @@
             if (mesh == null) { return; }
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            var ar = transform(mesh, FFTarr);
-            shape = createShape(gl, ar, mesh.v_indices);
-            drawShape(gl, program, shape, xf, proj, FFTarr);
+            var transformed_vertices = transform(mesh, FFTarr);
+            shape = createShape(gl, transformed_vertices, mesh.triangle_line_indices);
+            drawShape(gl, program, shape, xf, proj);
         }
 
         return {
@@ -166,12 +129,11 @@
         }
     }
 
-    // set up the analyzer node to perform FFT
-    var analyser = initializeAnalyzer(document.querySelector("audio"), 128, 0.5);
-
+    // gets the current audio from the HTML tag
+    var cur_audio = document.querySelector("audio");
     // create projection and MV matricies
     var xf = mat4.create();
-    mat4.lookAt(xf, [2.0, 1.0, 2.0],  [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
+    mat4.lookAt(xf, [2.0, 2.0, 1.0],  [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]);
 
     var proj = mat4.create();
     mat4.perspective(proj, 1.5472, 800.0/600.0, 0.1, 1000);
@@ -179,10 +141,13 @@
     function runWebGL(mesh) {
         // create the GL enviornment
         var webglCanvas = glEnv($("#webglCanvas"));
-
         webglCanvas.setMesh(mesh);
         webglCanvas.setProj(proj);
         webglCanvas.setXf(xf);
+
+        // set up the analyzer node to perform FFT
+        var fft_size = Math.min(Math.max(32, mesh.sample_number), 32768);
+        var analyser = initializeAnalyzer(cur_audio, fft_size, 0.85);
 
         function updateWebGL() {
             var FFT = getNormalizedFFT(analyser);
