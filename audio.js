@@ -9,7 +9,7 @@ function initializeAnalyzer(audio, sample_number, smoothing_constant) {
     var source = audio_ctx.createMediaElementSource(audio);
     var analyser = audio_ctx.createAnalyser();
 
-    analyser.fftSize = sample_number;
+    analyser.fftSize = sample_number * 2;
     analyser.smoothingTimeConstant = smoothing_constant;
 
     source.connect(analyser);

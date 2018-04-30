@@ -64,10 +64,12 @@ function createGlslProgram(gl, vertexShaderId, fragmentShaderId) {
 
 /**
  * Creates the shape object that is to be drawn; creates the vertex buffer from
- * [vertices] as well as the line index buffer from [line_indices]. These help
- * to specify which pair of vertices need to have an edge draw between them.
+ * [vertices] array. Creates the line index buffer from [mesh].line_indices 
+ * and the face index buffer from [mesh].face_indices. Line indices specify 
+ * which pair of vertices to draw edges between while face indices specify 
+ * which triple of vertices to draw a triangle face between.
  */
-function createShape(gl, vertices, line_indices) {
+function createShape(gl, vertices, mesh) {
     var shape = {};
 
     shape.vertexBuffer = gl.createBuffer();
@@ -76,21 +78,29 @@ function createShape(gl, vertices, line_indices) {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     shape.triangleLineIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleLineIndexBuffe);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(line_indices), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleLineIndexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.line_indices), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+    shape.triangleFaceIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleFaceIndexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.face_indices), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     shape.vertLen = vertices.length;
-    shape.idxLen = line_indices.length;
+    shape.lineIdxLen = mesh.line_indices.length;
+    shape.faceIdxLen = mesh.face_indices.length;
     return shape;
 }
 
 /**
  * This function draws the [shape] to the canvas using the shaders specified by
  * [program]. Also sets the model-view matrix [xf] and the projection matrix
- * [proj] as uniform variables in the fragment shader.
+ * [proj] as uniform variables in the fragment shader. If [face_mode] is TRUE, 
+ * then triangle faces are drawn to the screen in index triples. If [face_mode] 
+ * is FALSE, then edges are drawn to the screen in index pairs instead.
  */
-function drawShape(gl, program, shape, xf, proj) {
+function drawShape(gl, program, shape, xf, proj, face_mode) {
     gl.useProgram(program);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
@@ -99,9 +109,16 @@ function drawShape(gl, program, shape, xf, proj) {
     gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 4*3, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleIndexBuffer);
-    gl.drawElements(gl.LINES, shape.idxLen, gl.UNSIGNED_SHORT, 0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    if (face_mode) {
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleFaceIndexBuffer);
+        gl.drawElements(gl.TRIANGLES, shape.faceIdxLen, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    }
+    else {
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleLineIndexBuffer);
+        gl.drawElements(gl.LINES, shape.lineIdxLen, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    }
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelView"), false, xf);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projection"), false, proj);

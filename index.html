@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="shortcut icon" href="">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>CS 4621: Final Project</title>
-
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/cs4620.css" rel="stylesheet">
@@ -22,8 +22,13 @@
         <canvas tabindex="1" id="webglCanvas" style="border: none; background-color: black;" width="800" height="600"></canvas>
     </div>
 
-
     <table class="table table-bordered">
+            <tr>
+                <td colspan="2" align="center">
+                    <input type="radio" name="mode" id="face" checked> Face Mode<br>
+                    <input type="radio" name="mode" id="edge"> Edge Mode<br>
+                </td>
+            </tr>
             <tr>
                 <td colspan="1" align="center"><b><h3>Audio File</h3></b></td>
                 <td colspan="1" align="center"><b><h3>Mesh File</h3></b></td>
@@ -88,8 +93,8 @@
     function startWebGL(event) {
         runWebGL(loadMeshFile(event));
     }
-    function glEnv(canvas) {
 
+    function glEnv(canvas) {
         var gl = initializeWebGL(canvas);
         gl.enable(gl.DEPTH_TEST);
         var program = createGlslProgram(gl, "vertexShader", "fragmentShader");
@@ -116,8 +121,12 @@
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             var transformed_vertices = transform(mesh, FFTarr);
-            shape = createShape(gl, transformed_vertices, mesh.triangle_line_indices);
-            drawShape(gl, program, shape, xf, proj);
+            shape = createShape(gl, transformed_vertices, mesh);
+            if (document.getElementById('face').checked){
+                drawShape(gl, program, shape, xf, proj, true);
+            } else {
+                drawShape(gl, program, shape, xf, proj, false);
+            }
         }
 
         return {
@@ -131,14 +140,13 @@
 
     // gets the current audio from the HTML tag
     var cur_audio = document.querySelector("audio");
+
     // create projection and MV matricies
     var xf = mat4.create();
-    mat4.lookAt(xf, [2.0, 2.0, 1.0],  [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]);
-
     var proj = mat4.create();
-    mat4.perspective(proj, 1.5472, 800.0/600.0, 0.1, 1000);
 
     function runWebGL(mesh) {
+        console.log(mesh);
         // create the GL enviornment
         var webglCanvas = glEnv($("#webglCanvas"));
         webglCanvas.setMesh(mesh);
@@ -147,9 +155,15 @@
 
         // set up the analyzer node to perform FFT
         var fft_size = Math.min(Math.max(32, mesh.sample_number), 32768);
-        var analyser = initializeAnalyzer(cur_audio, fft_size, 0.85);
+        var analyser = initializeAnalyzer(cur_audio, fft_size, 0.777);
 
         function updateWebGL() {
+            mat4.lookAt(xf, CAMERA_LOCATION,  [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]);
+            mat4.perspective(proj, CAMERA_FOV, 800.0/600.0, 0.1, 1000);
+
+            webglCanvas.setXf(xf);
+            webglCanvas.setProj(proj);
+
             var FFT = getNormalizedFFT(analyser);
             webglCanvas.drawFrame(FFT);
             window.requestAnimationFrame(updateWebGL);

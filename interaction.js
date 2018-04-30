@@ -31,7 +31,8 @@ function loadAudioFile(file) {
 function createMesh(text) {
     var vertices = [];
     var normals = [];
-    var triangle_line_indices = [];
+    var face_indices = [];
+    var line_indices = [];
     var vertex_to_normal = new Map();
     var n = 0;
 
@@ -45,15 +46,15 @@ function createMesh(text) {
                 vertices.push(parseFloat(line[3]));
                 n++;
                 break;
-            case 'n':
+            case 'vn':
                 normals.push(parseFloat(line[1]));
                 normals.push(parseFloat(line[2]));
                 normals.push(parseFloat(line[3]));
                 break;
             case 'f':
-                var idx1 = line[1].split("//");             // v1
-                var idx2 = line[2].split("//");             // v2
-                var idx3 = line[3].split("//");             // v3
+                var idx1 = line[1].split("//");         // [v1, n1]
+                var idx2 = line[2].split("//");         // [v2, n2]
+                var idx3 = line[3].split("//");         // [v3, n3]
                 // map v1 -> n1
                 vertex_to_normal.set(parseInt(idx1[0]), parseInt(idx1[1]));     
                 // map v2 -> n2
@@ -61,11 +62,15 @@ function createMesh(text) {
                 // map v3 -> n3
                 vertex_to_normal.set(parseInt(idx3[0]), parseInt(idx3[1]));     
                 // edge (v1,v2)
-                triangle_line_indices.push(parseInt(idx1[0]),parseInt(idx2[0]));
+                line_indices.push(parseInt(idx1[0]),parseInt(idx2[0]));
                 // edge (v2,v3)
-                triangle_line_indices.push(parseInt(idx2[0]),parseInt(idx3[0]));
+                line_indices.push(parseInt(idx2[0]),parseInt(idx3[0]));
                 // edge (v3,v1)
-                triangle_line_indices.push(parseInt(idx3[0]),parseInt(idx1[0]));
+                line_indices.push(parseInt(idx3[0]),parseInt(idx1[0]));
+                // face (v1, v2, v3)
+                face_indices.push(parseInt(idx1[0]));
+                face_indices.push(parseInt(idx2[0]));
+                face_indices.push(parseInt(idx3[0]));
                 break;
         }
     }
@@ -74,7 +79,73 @@ function createMesh(text) {
         sample_number: Math.pow(2,n),
         vertices: vertices,
         normals: normals,
-        triangle_line_indices: triangle_line_indices,
+        line_indices: line_indices,
+        face_indices: face_indices,
         vertex_to_normal: vertex_to_normal
     };
 }
+
+// Current position of the camera in 3D space
+var CAMERA_LOCATION = vec3.fromValues(0.0, 3.0, 1.0);
+// Current field-of-view of the camera (in radians)
+var CAMERA_FOV = Math.PI/6;
+// Current horizontal axis-of-rotation
+var HORIZONTAL_AOR = vec3.fromValues(0.0, 0.0, 1.0);
+// Current vertical axis-of-rotation
+var VERTICAL_AOR = vec3.fromValues(1.0, 0.0, 0.0);
+// Left rotation matrix (5 degrees)
+var LEFT_ROT_M = mat4.create();
+// Right rotation matrix (5 degrees)
+var RIGHT_ROT_M = mat4.create();
+// Up translation matrix
+var UP_TRANS_M = mat4.create();
+// Down translation matrix
+var DOWN_TRANS_M = mat4.create();
+
+/**
+ * Callback function for user-inputted keypress:
+ * left arrow key: rotates camera to the left around the camera targer
+ * right arrow key: rotates camera to the right around the camera targer
+ * up arrow key: moves camera in the upwards direction (+z-axis)
+ * down arrow key: moves camera in the downwards direction (-z-axis)
+ */
+$("#webglCanvas").on("keydown", function (key) {
+    // TODO: Edit this so that the crawler responds to the arrow keys.
+    key.preventDefault();
+    switch (key.keyCode) {
+        case 37:        // left arrow key
+            mat4.fromRotation(LEFT_ROT_M, -0.0872665, HORIZONTAL_AOR);
+            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, LEFT_ROT_M);
+            break;
+        case 39:        // right arrow key
+            mat4.fromRotation(RIGHT_ROT_M, 0.0872665, HORIZONTAL_AOR);
+            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, RIGHT_ROT_M);
+            break;
+        case 38:        // up arrow key
+            mat4.fromTranslation(UP_TRANS_M, [0.0, 0.0, 0.1]);
+            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, UP_TRANS_M);
+            break;
+        case 40:        // down arrow key
+            mat4.fromTranslation(DOWN_TRANS_M, [0.0, 0.0, -0.1])
+            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, DOWN_TRANS_M);
+            break;
+    }
+});
+
+/**
+ * Callback function for user-inputted mousewheel scroll:
+ * scrolling up: zooms camera in and decreases the FOV
+ * scrolling down: zooms camera out and increases the FOV
+ */
+$("#webglCanvas").on("wheel", function(wheel) {
+    var delta = wheel.originalEvent.deltaY;
+    if (delta > 0) {
+        if (CAMERA_FOV >= 1.309) CAMERA_FOV = 1.309;
+        else CAMERA_FOV += 0.0872665;
+    }
+    else {
+        if (CAMERA_FOV <= 0.174533) CAMERA_FOV = 0.174533;
+        else CAMERA_FOV -= 0.0872665;
+    }
+    return false;
+});
