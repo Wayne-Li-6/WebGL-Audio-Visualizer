@@ -110,11 +110,17 @@ function drawShape(gl, program, shape, xf, proj, face_mode) {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     if (face_mode) {
+        gl.uniform1i(gl.getUniformLocation(program, "isFace"), 1);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleFaceIndexBuffer);
         gl.drawElements(gl.TRIANGLES, shape.faceIdxLen, gl.UNSIGNED_SHORT, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-    }
-    else {
+
+        gl.uniform1i(gl.getUniformLocation(program, "isFace"), 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleLineIndexBuffer);
+        gl.drawElements(gl.LINES, shape.lineIdxLen, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    } else {
+        gl.uniform1i(gl.getUniformLocation(program, "isFace"), 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shape.triangleLineIndexBuffer);
         gl.drawElements(gl.LINES, shape.lineIdxLen, gl.UNSIGNED_SHORT, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);

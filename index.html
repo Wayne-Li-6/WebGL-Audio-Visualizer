@@ -80,9 +80,15 @@
     precision highp float;
 
     uniform float size;
+    uniform int isFace;
 
     void main() {
-        gl_FragColor = vec4(1,1,1,1);
+        if (isFace == 1) {
+            gl_FragColor = vec4(1,1,1,1);
+        }
+        else {
+            gl_FragColor = vec4(0.15,0.15,0.9,1);
+        }
     }
 </script>
 
