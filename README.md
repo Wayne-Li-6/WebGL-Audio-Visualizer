@@ -3,14 +3,15 @@
 
 Instructions: Run `python -m SimpleHTTPServer`  
 Current Camera Controls (subject to change):
-Input | Response
------ | --------
-`up` arrow key | Translate the camera in the down direction (+z axis)
-`down` arrow key | Translate the camera in the down direction (-z axis)
-`left` arrow key | Rotate camera to the left around the camera target (currently fixed @ origin)
-`right` arrow key | Rotate camera to the right around the camera target (currently fixed @ origin)
-`up` mouse scroll | Zoom in towards camera target (decrease field-of-view)
-`down` mouse scroll | Zoom out from camerat target (increase field-of-view)
+
+| Input | Response |
+| ----- | -------- |
+| `up` arrow key | Translate the camera in the down direction (+z axis) |
+| `down` arrow key | Translate the camera in the down direction (-z axis) |
+| `left` arrow key | Rotate camera to the left around the camera target (currently fixed @ origin) |
+| `right` arrow key | Rotate camera to the right around the camera target (currently fixed @ origin) |
+| `up` mouse scroll | Zoom in towards camera target (decrease field-of-view) |
+| `down` mouse scroll | Zoom out from camerat target (increase field-of-view) |
 
 ### TODO Tasks:
 - [X] Proof of Concept (draw to the screen)
