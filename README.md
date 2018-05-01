@@ -21,8 +21,11 @@ Current Camera Controls (subject to change):
 - [X] Camera controls using keypresses and mouse
 - [ ] Parameterize colors and allow user to choose appearance
 - [ ] (IMPORTANT) Figure out double-buffering and bloom-filtering
-- [ ] (IMPORTANT) Figure out how to allow user to use built-in microphone to create their own audio recording that can be played back
+- [X] (IMPORTANT) Figure out how to allow user to use built-in microphone to create their own audio that can be visualized
 - [ ] Improve appearance/theme of application (fullscreen? ; move controls to sidebar? ; etc.)
+- [ ] Add a default camera animation when the user is idle
+- [ ] See if a skybox/background can be implemented without having a loss in quality due to any Gaussian blurs that we might use
+- [ ] Allow more than one mesh per session (currently breaks if a different mesh from the original is uploaded)
 
 ### File Structure / Organization
 `index.html` : The central script. Contains all of the HTML and CSS for the web application as well as the GLSL vertex and fragment shaders. Also has the "main" script which initializes the glEnvironment and prepares the update loop to start drawing frames.
@@ -34,6 +37,9 @@ Current Camera Controls (subject to change):
 `webgl.js` : Anything related to using WebGL to draw. Contains most of the boilerplate code to set up the WebGL context and create, compile, and link the GLSL shaders into a program. Also has functions that set up the various vertex and index buffers. Creates/draws the shapes required by the mesh to the canvas by passing values to the appropriate shaders.
 
 ### Change Log
+* April 30, 2018
+    * Restructrued `audio.js` to allow for new audio mode where the user inputs their own audio through their microphone to be visualized
+    * Changed around HTML to allow for two different audio modes (audio file and user-input); can easily switch between modes using radio buttons
 * April 29, 2018
     * Fixed/augmented mesh file parsing to allow for both triangle faces mode and triangle edges mode; user selects rendering mode using a simple radio button
     * Added more complicated icosphere meshes in `assets` folder

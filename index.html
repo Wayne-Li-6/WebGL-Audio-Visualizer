@@ -24,22 +24,31 @@
 
     <table class="table table-bordered">
             <tr>
-                <td colspan="2" align="center">
-                    <input type="radio" name="mode" id="face" checked> Face Mode<br>
-                    <input type="radio" name="mode" id="edge"> Edge Mode<br>
+                <td colspan="3" align="center"><b><h1>Display Settings</h1></b></td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <input type="radio" name="display_mode" id="face" checked> Face Mode<br>
+                    <input type="radio" name="display_mode" id="edge"> Edge Mode<br>
+                </td>
+                <td align="right"><b><h3>Mesh File</h3></b></td>
+                <td align="center">
+                    <input type="file" onchange="loadMeshFile(event)">
                 </td>
             </tr>
+
             <tr>
-                <td colspan="1" align="center"><b><h3>Audio File</h3></b></td>
-                <td colspan="1" align="center"><b><h3>Mesh File</h3></b></td>
+                <td colspan="3" align="center"><b><h1>Audio Settings</h1></b></td>
             </tr>
             <tr>
+                <td align="center">
+                    <input type="radio" name="audio_mode" id="a_file" checked> Audio File<br>
+                    <input type="radio" name="audio_mode" id="a_user"> User Audio<br>
+                </td>
+                <td align="right"><b><h3>Audio File</h3></b></td>
                 <td align="center">
                     <input type="file" onchange="loadAudioFile(event)"></h3>
                     <audio id="user-audio" controls></audio>
-                </td>
-                <td align="center">
-                    <input type="file" onchange="loadMeshFile(event)">
                 </td>
             </tr>
             <!-- <tr>
@@ -144,25 +153,34 @@
         }
     }
 
-    // gets the current audio from the HTML tag
-    var cur_audio = document.querySelector("audio");
-
-    // create projection and MV matricies
-    var xf = mat4.create();
-    var proj = mat4.create();
-
     function runWebGL(mesh) {
         console.log(mesh);
+        // gets the current audio from the HTML tag
+        var cur_audio = document.querySelector("audio");
+
         // create the GL enviornment
         var webglCanvas = glEnv($("#webglCanvas"));
         webglCanvas.setMesh(mesh);
-        webglCanvas.setProj(proj);
-        webglCanvas.setXf(xf);
+
+        // create projection and MV matricies
+        var xf = mat4.create();
+        var proj = mat4.create();
 
         // set up the analyzer node to perform FFT
         var fft_size = Math.min(Math.max(32, mesh.sample_number), 32768);
-        var analyser = initializeAnalyzer(cur_audio, fft_size, 0.777);
+        initializeAudioNodes(fft_size, 0.777);
+        var analyzer = switchAudioFile(cur_audio);
 
+        // callback function to see if audio source has changed
+        $("input[name='audio_mode']").change(async function () {
+            if (document.getElementById('a_file').checked){
+                analyzer = switchAudioFile(cur_audio);
+            } else {
+                analyzer = await (switchUserAudio());
+            }
+        });
+
+        // busy loop to draw to the screen
         function updateWebGL() {
             mat4.lookAt(xf, CAMERA_LOCATION,  [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(proj, CAMERA_FOV, 800.0/600.0, 0.1, 1000);
@@ -170,13 +188,12 @@
             webglCanvas.setXf(xf);
             webglCanvas.setProj(proj);
 
-            var FFT = getNormalizedFFT(analyser);
+            var FFT = getNormalizedFFT(analyzer);
             webglCanvas.drawFrame(FFT);
             window.requestAnimationFrame(updateWebGL);
         }
         window.requestAnimationFrame(updateWebGL);
     }
-
     // startWebGL();
 </script>
 

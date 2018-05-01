@@ -1,20 +1,66 @@
+// An object contatining all of the used Audio Nodes in the graph
+var AUDIO_NODES = {
+    audio_ctx: null,
+    media_source: null,
+    stream_source: null,
+    analyzer: null,
+    filter: null
+};
+
 /**
- * Initializes the Analyzer node for [audio] to prepare for performing a real
- * time FFT. [sample_number] specifies the number of frequency samples and 
- * [smoothing_constant] specifies the averaging constant between frames. 
- * Returns the newly created Analyzer Node. 
+ * Initializes the all of the audio nodes node for to prepare for reading in and
+ * performing a real time FFT on the audio. [sample_number] specifies the number 
+ * of frequency samples and [smoothing_constant] specifies the averaging 
+ * constant between frames. Returns the newly created AUDIO_NODES object. 
  */
-function initializeAnalyzer(audio, sample_number, smoothing_constant) {
-    var audio_ctx = new(window.AudioContext || window.webkitAudioContext)();
-    var source = audio_ctx.createMediaElementSource(audio);
-    var analyser = audio_ctx.createAnalyser();
+function initializeAudioNodes(sample_number, smoothing_constant) {
+    AUDIO_NODES.audio_ctx = new(window.AudioContext || window.webkitAudioContext)();
 
-    analyser.fftSize = sample_number * 2;
-    analyser.smoothingTimeConstant = smoothing_constant;
+    AUDIO_NODES.analyzer = AUDIO_NODES.audio_ctx.createAnalyser();
+    AUDIO_NODES.analyzer.fftSize = sample_number*2;
+    AUDIO_NODES.analyzer.smoothingTimeConstant = smoothing_constant;
 
-    source.connect(analyser);
-    source.connect(audio_ctx.destination);
-    return analyser;
+    AUDIO_NODES.filter = AUDIO_NODES.audio_ctx.createBiquadFilter();
+    AUDIO_NODES.filter.type = "lowshelf";
+
+    AUDIO_NODES.analyzer.connect(AUDIO_NODES.filter);
+    AUDIO_NODES.filter.connect(AUDIO_NODES.audio_ctx.destination);
+}
+
+/**
+ * Creates a new MediaElementSource node using [audio] (if it did not exist 
+ * before) and connects it to the existing Audio Node graph through the 
+ * Analyzer node. It disconnects any previous stream connections if they exist.
+ */
+function switchAudioFile(audio) {
+    if (AUDIO_NODES.media_source == null) {
+        AUDIO_NODES.media_source = AUDIO_NODES.audio_ctx.createMediaElementSource(audio);
+    }
+    if (AUDIO_NODES.stream_source != null) {
+        AUDIO_NODES.stream_source.disconnect(AUDIO_NODES.analyzer);
+    }
+    AUDIO_NODES.media_source.connect(AUDIO_NODES.analyzer);
+    return AUDIO_NODES.analyzer;
+}
+
+/**
+ * Creates a new MediaStreamSource node using the browser's getUserMedia 
+ * function (if it did not exist before) and connects it to the existing Audio 
+ * Node graph through the Analyzer node. It disconnects any previous media 
+ * connections if they exist.
+ */
+async function switchUserAudio() {
+    var constriants = { audio: true, video: false };
+    var stream = await (navigator.mediaDevices.getUserMedia(constriants));
+
+    if (AUDIO_NODES.stream_source == null){
+        AUDIO_NODES.stream_source = AUDIO_NODES.audio_ctx.createMediaStreamSource(stream);
+    }
+    if (AUDIO_NODES.media_source != null) {
+        AUDIO_NODES.media_source.disconnect(AUDIO_NODES.analyzer);
+    }
+    AUDIO_NODES.stream_source.connect(AUDIO_NODES.analyzer);
+    return Promise.resolve(AUDIO_NODES.analyzer);
 }
 
 /**
