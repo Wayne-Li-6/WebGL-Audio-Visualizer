@@ -270,7 +270,7 @@
 
         // busy loop to draw to the screen
         function updateWebGL() {
-            mat4.lookAt(xf, CAMERA_LOCATION,  [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]);
+            mat4.lookAt(xf, CAMERA_LOCATION,  [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
             mat4.perspective(proj, CAMERA_FOV, 800.0/600.0, 0.1, 1000);
             mat4.invert(norm, xf);
             mat4.transpose(norm, norm);

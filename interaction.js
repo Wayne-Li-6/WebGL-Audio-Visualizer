@@ -90,13 +90,13 @@ function createMesh(text) {
 }
 
 // Current position of the camera in 3D space
-var CAMERA_LOCATION = vec3.fromValues(0.0, 3.0, 1.0);
+var CAMERA_LOCATION = vec3.fromValues(0.0, 1.0, 3.0);
 // Current field-of-view of the camera (in radians)
 var CAMERA_FOV = Math.PI/6;
 // Current horizontal axis-of-rotation
-var HORIZONTAL_AOR = vec3.fromValues(0.0, 0.0, 1.0);
+var HORIZONTAL_AOR = vec3.fromValues(0.0, 1.0, 0.0);
 // Current vertical axis-of-rotation
-var VERTICAL_AOR = vec3.fromValues(1.0, 0.0, 0.0);
+// var VERTICAL_AOR = vec3.fromValues(1.0, 0.0, 0.0);
 // Left rotation matrix (5 degrees)
 var LEFT_ROT_M = mat4.create();
 // Right rotation matrix (5 degrees)
@@ -126,11 +126,11 @@ $("#webglCanvas").on("keydown", function (key) {
             vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, RIGHT_ROT_M);
             break;
         case 38:        // up arrow key
-            mat4.fromTranslation(UP_TRANS_M, [0.0, 0.0, 0.1]);
+            mat4.fromTranslation(UP_TRANS_M, [0.0, 0.1, 0.0]);
             vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, UP_TRANS_M);
             break;
         case 40:        // down arrow key
-            mat4.fromTranslation(DOWN_TRANS_M, [0.0, 0.0, -0.1])
+            mat4.fromTranslation(DOWN_TRANS_M, [0.0, -0.1, 0.0])
             vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, DOWN_TRANS_M);
             break;
     }
