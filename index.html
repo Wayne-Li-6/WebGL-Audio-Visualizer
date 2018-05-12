@@ -73,22 +73,34 @@
 <!--*************************************************************************-->
 <script id="vertexShader" type="x-shader/x-vertex">
     attribute vec3 vert_position;
+    attribute vec3 vert_normal;
 
     uniform mat4 projection;
     uniform mat4 modelView;
+    uniform mat4 normal;
+
+    varying vec4 v_position;
+    varying vec3 v_normal;
+    varying vec4 red_camera;
+    varying vec4 green_camera;
+    varying vec4 blue_camera;
     
     void main() {
-        gl_Position = projection * modelView * vec4(vert_position, 1.0);
+        v_position = modelView * vec4(vert_position, 1.0);
+        gl_Position = projection * v_position;
+        v_normal = (normal * vec4(vert_normal, 1.0)).xyz;
+        red_camera = modelView * vec4(4.0, 4.0, 4.0, 1.0);
+        green_camera = modelView * vec4(-6.0, 0.0, 0.0, 1.0);
+        blue_camera = modelView * vec4(4.0, -4.0, -4.0, 1.0);
     }
 </script>
 
 <!--*************************************************************************-->
-<!--************************** FRAGMENT SHADER ******************************-->
+<!--************************* FRAGMENT SHADERS ******************************-->
 <!--*************************************************************************-->
 <script id="fragmentShader" type="x-shader/x-fragment">
     precision highp float;
 
-    uniform float size;
     uniform int isFace;
 
     void main() {
@@ -97,6 +109,70 @@
         }
         else {
             gl_FragColor = vec4(0.15,0.15,0.9,1);
+        }
+    }
+</script>
+
+<script id="fragmentShader02" type="x-shader/x-fragment">
+    precision highp float;
+
+    uniform int isFace;
+    uniform vec3 camera_loc;
+
+    varying vec4 v_position;
+    varying vec3 v_normal;
+
+    varying vec4 red_camera;
+    varying vec4 green_camera;
+    varying vec4 blue_camera;
+
+    const vec4 red = vec4(150,0,0,1);
+    const vec4 green = vec4(0,150,0,1);
+    const vec4 blue = vec4(0,0,150,1);
+
+    // shading using Phong model
+    vec4 illumination() {
+        vec4 camera = vec4(0,0,0,0);
+        vec4 color = vec4(0,0,0,0);
+        vec3 n = normalize(v_normal);
+        vec3 v = normalize(-v_position.xyz);
+
+        vec4 final_color = vec4(0,0,0,0);
+
+        for (int i = 0; i < 3; i++) {
+            if (i == 0) {
+                camera = red_camera;
+                color = red;
+            }
+            if (i == 1) {
+                camera = green_camera;
+                color = green;
+            }
+            if (i == 2) {
+                camera = blue_camera;
+                color = blue;
+            }
+
+            float r = length(camera.xyz - v_position.xyz);
+            vec3 l = normalize(camera.xyz - v_position.xyz);
+            vec3 h = normalize(l + v);
+
+            // calculate diffuse term
+            float L_diffuse = 0.1 * max(dot(n, l), 0.0);
+
+            // calculate specular term
+            float L_spec = 0.1 * pow(max(dot(n, h), 0.0), 3.0);
+            final_color += (color * (L_diffuse + L_spec) / (r*r));
+        }
+        return final_color;
+    }
+
+    void main() {
+        if (isFace == 1) {
+            gl_FragColor = illumination();
+        }
+        else {
+            gl_FragColor = vec4(1,1,1,1);
         }
     }
 </script>
@@ -112,7 +188,7 @@
     function glEnv(canvas) {
         var gl = initializeWebGL(canvas);
         gl.enable(gl.DEPTH_TEST);
-        var program = createGlslProgram(gl, "vertexShader", "fragmentShader");
+        var program = createGlslProgram(gl, "vertexShader", "fragmentShader02");
         var shape;
 
         // create the setter functions
@@ -131,16 +207,21 @@
             mat4.copy(proj, newProj);
         }
 
+        var norm = mat4.create();
+        function setNorm(newNorm) {
+            mat4.copy(norm, newNorm);
+        }
+
         function drawFrame(FFTarr) {
             if (mesh == null) { return; }
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            var transformed_vertices = transform(mesh, FFTarr);
-            shape = createShape(gl, transformed_vertices, mesh);
+            var transformed_array = transform(mesh, FFTarr);
+            shape = createShape(gl, transformed_array[0], transformed_array[1], mesh);
             if (document.getElementById('face').checked){
-                drawShape(gl, program, shape, xf, proj, true);
+                drawShape(gl, program, shape, xf, proj, norm, true);
             } else {
-                drawShape(gl, program, shape, xf, proj, false);
+                drawShape(gl, program, shape, xf, proj, norm, false);
             }
         }
 
@@ -149,9 +230,14 @@
             setMesh: setMesh,
             setXf: setXf,
             setProj: setProj,
+            setNorm: setNorm,
             drawFrame: drawFrame,
         }
     }
+
+    // sets up the audio nodes, including the analyzer node to perform FFT
+    initializeAudioNodes(0.777);
+    var analyzer = null;
 
     function runWebGL(mesh) {
         console.log(mesh);
@@ -162,14 +248,16 @@
         var webglCanvas = glEnv($("#webglCanvas"));
         webglCanvas.setMesh(mesh);
 
-        // create projection and MV matricies
+        // create modelView, projection, and normal matricies
         var xf = mat4.create();
         var proj = mat4.create();
+        var norm = mat4.create();
 
-        // set up the analyzer node to perform FFT
-        var fft_size = Math.min(Math.max(32, mesh.sample_number), 32768);
-        initializeAudioNodes(fft_size, 0.777);
-        var analyzer = switchAudioFile(cur_audio);
+        // check if the analyzer node has already been set prior
+        if (analyzer == null) {
+            analyzer = switchAudioFile(cur_audio);
+        }
+        analyzer.fftSize = Math.min(Math.max(16, mesh.sample_number),16384) * 2;
 
         // callback function to see if audio source has changed
         $("input[name='audio_mode']").change(async function () {
@@ -184,9 +272,12 @@
         function updateWebGL() {
             mat4.lookAt(xf, CAMERA_LOCATION,  [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(proj, CAMERA_FOV, 800.0/600.0, 0.1, 1000);
+            mat4.invert(norm, xf);
+            mat4.transpose(norm, norm);
 
             webglCanvas.setXf(xf);
             webglCanvas.setProj(proj);
+            webglCanvas.setNorm(norm);
 
             var FFT = getNormalizedFFT(analyzer);
             webglCanvas.drawFrame(FFT);

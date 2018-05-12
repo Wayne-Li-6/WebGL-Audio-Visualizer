@@ -8,16 +8,14 @@ var AUDIO_NODES = {
 };
 
 /**
- * Initializes the all of the audio nodes node for to prepare for reading in and
- * performing a real time FFT on the audio. [sample_number] specifies the number 
- * of frequency samples and [smoothing_constant] specifies the averaging 
- * constant between frames. Returns the newly created AUDIO_NODES object. 
+ * Initializes all of the audio nodes node to prepare for reading in and
+ * performing a real time FFT on the audio. [smoothing_constant] specifies the 
+ * averaging constant between frames. Updates the global AUDIO_NODES object. 
  */
-function initializeAudioNodes(sample_number, smoothing_constant) {
+function initializeAudioNodes(smoothing_constant) {
     AUDIO_NODES.audio_ctx = new(window.AudioContext || window.webkitAudioContext)();
 
-    AUDIO_NODES.analyzer = AUDIO_NODES.audio_ctx.createAnalyser();
-    AUDIO_NODES.analyzer.fftSize = sample_number*2;
+    AUDIO_NODES.analyzer = AUDIO_NODES.audio_ctx.createAnalyser();               
     AUDIO_NODES.analyzer.smoothingTimeConstant = smoothing_constant;
 
     AUDIO_NODES.filter = AUDIO_NODES.audio_ctx.createBiquadFilter();
@@ -25,6 +23,7 @@ function initializeAudioNodes(sample_number, smoothing_constant) {
 
     AUDIO_NODES.analyzer.connect(AUDIO_NODES.filter);
     AUDIO_NODES.filter.connect(AUDIO_NODES.audio_ctx.destination);
+    AUDIO_NODES.valid = true;
 }
 
 /**
@@ -67,11 +66,11 @@ async function switchUserAudio() {
  * Returns the normalized frequency data of the current FFT analysis frame. All
  * values should be in the range from [0...1].
  */
-function getNormalizedFFT(analyser) {
-    var scale = 1.0 / (analyser.maxDecibels - analyser.minDecibels);
-    var offset = analyser.minDecibels;
-    var FFT = new Float32Array(analyser.frequencyBinCount);
-    analyser.getFloatFrequencyData(FFT);
+function getNormalizedFFT(analyzer) {
+    var scale = 1.0 / (analyzer.maxDecibels - analyzer.minDecibels);
+    var offset = analyzer.minDecibels;
+    var FFT = new Float32Array(analyzer.frequencyBinCount);
+    analyzer.getFloatFrequencyData(FFT);
 
     for (var i = 0; i < FFT.length; i++){
         FFT[i] = scale * (FFT[i] - offset);

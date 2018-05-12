@@ -69,12 +69,17 @@ function createGlslProgram(gl, vertexShaderId, fragmentShaderId) {
  * which pair of vertices to draw edges between while face indices specify 
  * which triple of vertices to draw a triangle face between.
  */
-function createShape(gl, vertices, mesh) {
+function createShape(gl, vertices, normals, mesh) {
     var shape = {};
 
     shape.vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    shape.normalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, shape.normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     shape.triangleLineIndexBuffer = gl.createBuffer();
@@ -100,13 +105,19 @@ function createShape(gl, vertices, mesh) {
  * then triangle faces are drawn to the screen in index triples. If [face_mode] 
  * is FALSE, then edges are drawn to the screen in index pairs instead.
  */
-function drawShape(gl, program, shape, xf, proj, face_mode) {
+function drawShape(gl, program, shape, xf, proj, norm, face_mode) {
     gl.useProgram(program);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
     var positionLocation = gl.getAttribLocation(program, "vert_position");
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 4*3, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, shape.normalBuffer);
+    var normalLocation = gl.getAttribLocation(program, "vert_normal");
+    gl.enableVertexAttribArray(normalLocation);
+    gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 4*3, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     if (face_mode) {
@@ -128,6 +139,7 @@ function drawShape(gl, program, shape, xf, proj, face_mode) {
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelView"), false, xf);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projection"), false, proj);
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "normal"), false, norm);
 
     gl.useProgram(null);
 }
@@ -135,10 +147,13 @@ function drawShape(gl, program, shape, xf, proj, face_mode) {
 /**
  * Function to modify the [mesh] vertices and translate their positions in the 
  * direction specified by their normals. The amount translated depends on the
- * vertex's associated frequency bin in the [FFT] array.
+ * vertex's associated frequency bin in the [FFT] array. Also helps to create
+ * a copy of the corresponding normal for each vertex and put it in an array.
+ * Returns an array of size 2 with element 0 = vertices and element 1 = normals.
  */
 function transform(mesh, FFT) {
     var vertices = mesh.vertices.slice();
+    var normals = [];
     for (var i = 0; i < vertices.length; i+=3) {
         var normal_idx = mesh.vertex_to_normal.get(i/3) * 3;
         var fft_idx = (i/3);
@@ -147,6 +162,9 @@ function transform(mesh, FFT) {
             vertices[i+1] += FFT[fft_idx] * mesh.normals[normal_idx+1];
             vertices[i+2] += FFT[fft_idx] * mesh.normals[normal_idx+2];
         }
+        normals.push(mesh.normals[normal_idx]);
+        normals.push(mesh.normals[normal_idx+1]);
+        normals.push(mesh.normals[normal_idx+2]);
     }
-    return vertices;
+    return [vertices, normals];
 }

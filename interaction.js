@@ -1,3 +1,6 @@
+//var MESH = {};
+var FIRST = true;
+var CHANGED = false;
 /**
  * Loads in a mesh file that the user has uploaded to the website. Reads in the
  * mesh file and converts it into a string representation that can be parsed.
@@ -6,8 +9,9 @@ function loadMeshFile(file) {
     var input = file.target;
     var reader = new FileReader();
     reader.onload = function(){
-        mesh = createMesh(reader.result);
+        var mesh = createMesh(reader.result);
         runWebGL(mesh);
+        // runWebGL();
     }
     reader.readAsText(input.files[0]);
 }
@@ -74,9 +78,9 @@ function createMesh(text) {
                 break;
         }
     }
-    n = Math.ceil(Math.log2(n));
+    var exp = Math.ceil(Math.log2(n));
     return {
-        sample_number: Math.pow(2,n),
+        sample_number: Math.pow(2,exp),
         vertices: vertices,
         normals: normals,
         line_indices: line_indices,
