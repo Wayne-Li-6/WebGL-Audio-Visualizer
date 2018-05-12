@@ -1,6 +1,3 @@
-//var MESH = {};
-var FIRST = true;
-var CHANGED = false;
 /**
  * Loads in a mesh file that the user has uploaded to the website. Reads in the
  * mesh file and converts it into a string representation that can be parsed.

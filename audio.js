@@ -23,7 +23,6 @@ function initializeAudioNodes(smoothing_constant) {
 
     AUDIO_NODES.analyzer.connect(AUDIO_NODES.filter);
     AUDIO_NODES.filter.connect(AUDIO_NODES.audio_ctx.destination);
-    AUDIO_NODES.valid = true;
 }
 
 /**
