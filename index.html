@@ -78,6 +78,7 @@
     uniform mat4 projection;
     uniform mat4 modelView;
     uniform mat4 normal;
+    uniform mat4 cameraRotation;
 
     varying vec4 v_position;
     varying vec3 v_normal;
@@ -89,9 +90,9 @@
         v_position = modelView * vec4(vert_position, 1.0);
         gl_Position = projection * v_position;
         v_normal = (normal * vec4(vert_normal, 1.0)).xyz;
-        red_camera = modelView * vec4(4.0, 4.0, 4.0, 1.0);
-        green_camera = modelView * vec4(-6.0, 0.0, 0.0, 1.0);
-        blue_camera = modelView * vec4(4.0, -4.0, -4.0, 1.0);
+        red_camera = modelView * cameraRotation * vec4(4.0, 4.0, 4.0, 1.0);
+        green_camera = modelView * cameraRotation * vec4(-6.0, 0.0, 0.0, 1.0);
+        blue_camera = modelView * cameraRotation * vec4(4.0, -4.0, -4.0, 1.0);
     }
 </script>
 
@@ -212,6 +213,11 @@
             mat4.copy(norm, newNorm);
         }
 
+        var cam_r = mat4.create();
+        function setCam_R(newCam_R) {
+            mat4.copy(cam_r, newCam_R);
+        }
+
         function drawFrame(FFTarr) {
             if (mesh == null) { return; }
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -219,9 +225,9 @@
             var transformed_array = transform(mesh, FFTarr);
             shape = createShape(gl, transformed_array[0], transformed_array[1], mesh);
             if (document.getElementById('face').checked){
-                drawShape(gl, program, shape, xf, proj, norm, true);
+                drawShape(gl, program, shape, xf, proj, norm, cam_r, true);
             } else {
-                drawShape(gl, program, shape, xf, proj, norm, false);
+                drawShape(gl, program, shape, xf, proj, norm, cam_r, false);
             }
         }
 
@@ -231,6 +237,7 @@
             setXf: setXf,
             setProj: setProj,
             setNorm: setNorm,
+            setCam_R: setCam_R,
             drawFrame: drawFrame,
         }
     }
@@ -252,6 +259,8 @@
         var xf = mat4.create();
         var proj = mat4.create();
         var norm = mat4.create();
+        var cam_r = mat4.create();
+        var cam_radians = 0.0;
 
         // check if the analyzer node has already been set prior
         if (analyzer == null) {
@@ -274,10 +283,13 @@
             mat4.perspective(proj, CAMERA_FOV, 800.0/600.0, 0.1, 1000);
             mat4.invert(norm, xf);
             mat4.transpose(norm, norm);
+            cam_radians = (cam_radians + 0.05) % (2* Math.PI);
+            mat4.fromRotation(cam_r, cam_radians, [0.0, 1.0, 0.0]);
 
             webglCanvas.setXf(xf);
             webglCanvas.setProj(proj);
             webglCanvas.setNorm(norm);
+            webglCanvas.setCam_R(cam_r);
 
             var FFT = getNormalizedFFT(analyzer);
             webglCanvas.drawFrame(FFT);

@@ -92,8 +92,6 @@ var CAMERA_LOCATION = vec3.fromValues(0.0, 1.0, 3.0);
 var CAMERA_FOV = Math.PI/6;
 // Current horizontal axis-of-rotation
 var HORIZONTAL_AOR = vec3.fromValues(0.0, 1.0, 0.0);
-// Current vertical axis-of-rotation
-// var VERTICAL_AOR = vec3.fromValues(1.0, 0.0, 0.0);
 // Left rotation matrix (5 degrees)
 var LEFT_ROT_M = mat4.create();
 // Right rotation matrix (5 degrees)
@@ -102,6 +100,10 @@ var RIGHT_ROT_M = mat4.create();
 var UP_TRANS_M = mat4.create();
 // Down translation matrix
 var DOWN_TRANS_M = mat4.create();
+// Forward translation matrix
+var FORWARD_TRANS_M = mat4.create();
+// Backward translation matrix
+var BACKWARD_TRANS_M = mat4.create();
 
 /**
  * Callback function for user-inputted keypress:
@@ -114,6 +116,14 @@ $("#webglCanvas").on("keydown", function (key) {
     // TODO: Edit this so that the crawler responds to the arrow keys.
     key.preventDefault();
     switch (key.keyCode) {
+        case 33:        // page up key
+            mat4.fromTranslation(UP_TRANS_M, [0.0, 0.1, 0.0]);
+            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, UP_TRANS_M);
+            break;
+        case 34:        // page down key
+            mat4.fromTranslation(DOWN_TRANS_M, [0.0, -0.1, 0.0])
+            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, DOWN_TRANS_M);
+            break;
         case 37:        // left arrow key
             mat4.fromRotation(LEFT_ROT_M, -0.0872665, HORIZONTAL_AOR);
             vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, LEFT_ROT_M);
@@ -123,12 +133,21 @@ $("#webglCanvas").on("keydown", function (key) {
             vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, RIGHT_ROT_M);
             break;
         case 38:        // up arrow key
-            mat4.fromTranslation(UP_TRANS_M, [0.0, 0.1, 0.0]);
-            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, UP_TRANS_M);
+            if (vec3.distance([0.0,0.0,0.0], CAMERA_LOCATION) < 0.25) { break; }
+            var translation = vec3.create();
+            vec3.negate(translation, CAMERA_LOCATION);
+            vec3.normalize(translation, translation);
+            vec3.scale(translation, translation, 0.2);
+            mat4.fromTranslation(FORWARD_TRANS_M, translation);
+            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, FORWARD_TRANS_M);
             break;
         case 40:        // down arrow key
-            mat4.fromTranslation(DOWN_TRANS_M, [0.0, -0.1, 0.0])
-            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, DOWN_TRANS_M);
+            if (vec3.distance([0.0,0.0,0.0], CAMERA_LOCATION) > 1000) { break; }
+            var translation = vec3.create();
+            vec3.normalize(translation, CAMERA_LOCATION);
+            vec3.scale(translation, translation, 0.2);
+            mat4.fromTranslation(BACKWARD_TRANS_M, translation);
+            vec3.transformMat4(CAMERA_LOCATION, CAMERA_LOCATION, BACKWARD_TRANS_M);
             break;
     }
 });

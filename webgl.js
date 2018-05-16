@@ -105,7 +105,7 @@ function createShape(gl, vertices, normals, mesh) {
  * then triangle faces are drawn to the screen in index triples. If [face_mode] 
  * is FALSE, then edges are drawn to the screen in index pairs instead.
  */
-function drawShape(gl, program, shape, xf, proj, norm, face_mode) {
+function drawShape(gl, program, shape, xf, proj, norm, cam_r, face_mode) {
     gl.useProgram(program);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, shape.vertexBuffer);
@@ -140,6 +140,7 @@ function drawShape(gl, program, shape, xf, proj, norm, face_mode) {
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelView"), false, xf);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projection"), false, proj);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "normal"), false, norm);
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "cameraRotation"), false, cam_r);
 
     gl.useProgram(null);
 }
