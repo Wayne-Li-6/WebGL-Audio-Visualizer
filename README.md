@@ -6,10 +6,12 @@ Current Camera Controls (subject to change):
 
 | Input | Response |
 | ----- | -------- |
-| `up` arrow key | Translate the camera in the down direction (+z axis) |
-| `down` arrow key | Translate the camera in the down direction (-z axis) |
-| `left` arrow key | Rotate camera to the left around the camera target (currently fixed @ origin) |
-| `right` arrow key | Rotate camera to the right around the camera target (currently fixed @ origin) |
+| `PgUp` arrow key | Translate the camera in the up direction (+y axis) |
+| `PgDn` arrow key | Translate the camera in the down direction (-y axis) |
+| `up` arrow key | Translate the camera in the forward direction (towards origin) |
+| `down` arrow key | Translate the camera in the backward direction (away from origin) |
+| `left` arrow key | Rotate camera to the left around the camera target (fixed @ origin) |
+| `right` arrow key | Rotate camera to the right around the camera target (fixed @ origin) |
 | `up` mouse scroll | Zoom in towards camera target (decrease field-of-view) |
 | `down` mouse scroll | Zoom out from camerat target (increase field-of-view) |
 
@@ -37,6 +39,9 @@ Current Camera Controls (subject to change):
 `webgl.js` : Anything related to using WebGL to draw. Contains most of the boilerplate code to set up the WebGL context and create, compile, and link the GLSL shaders into a program. Also has functions that set up the various vertex and index buffers. Creates/draws the shapes required by the mesh to the canvas by passing values to the appropriate shaders.
 
 ### Change Log
+* May 15, 2018
+    * Added animation to the 3 light sources; each light now rotates around the mesh constantly
+    * Added additional camera controls for translating towards and away from the mesh using up and down arrow keys, shifted translating upwards/downwards to the page up and page down keys
 * May 11, 2018
     * Fixed issue with loading different meshes after the first one in the same session
     * Added two new meshes to the assets folder to play around with: `bunny.txt` and `suzanne.txt`
