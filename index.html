@@ -13,50 +13,57 @@
     <link href="css/jquery-ui.min.css" rel="stylesheet">
     <link href="css/jquery-ui.theme.min.css" rel="stylesheet">
     <link href="css/jquery-ui.structure.min.css" rel="stylesheet">
+    <link href="css/w3.css" rel="stylesheet">
 </head>
 <body>
-<div class="container">
-    <h1>CS 4621 Final Project: <span class="subtitle">Audio Visualizer</span></h1>
-
-    <div align="center">
-        <canvas tabindex="1" id="webglCanvas" style="border: none; background-color: black;" width="800" height="600"></canvas>
-    </div>
+<div class="w3-sidebar w3-bar-block" style="width:25%; display:none" id="sidebar"> 
+    <button onclick="w3_close()" class="w3-bar-item w3-large">Close &times;</button>
+    <b><h1 align="center">Display Settings</h1></b>
 
     <table class="table table-bordered">
-            <tr>
-                <td colspan="3" align="center"><b><h1>Display Settings</h1></b></td>
-            </tr>
-            <tr>
-                <td align="center">
-                    <input type="radio" name="display_mode" id="face" checked> Face Mode<br>
-                    <input type="radio" name="display_mode" id="edge"> Edge Mode<br>
-                </td>
-                <td align="right"><b><h3>Mesh File</h3></b></td>
-                <td align="center">
-                    <input type="file" onchange="loadMeshFile(event)">
-                </td>
-            </tr>
+        <tr> 
+            <td align="right"><b><h3>Mode</h3></b></td>
+            <td align="left">
+                <input type="radio" name="display_mode" id="face" checked> Face Mode<br>
+                <input type="radio" name="display_mode" id="edge"> Edge Mode<br>
+            </td>
+        </tr>
 
-            <tr>
-                <td colspan="3" align="center"><b><h1>Audio Settings</h1></b></td>
-            </tr>
-            <tr>
-                <td align="center">
-                    <input type="radio" name="audio_mode" id="a_file" checked> Audio File<br>
-                    <input type="radio" name="audio_mode" id="a_user"> User Audio<br>
-                </td>
-                <td align="right"><b><h3>Audio File</h3></b></td>
-                <td align="center">
-                    <input type="file" onchange="loadAudioFile(event)"></h3>
-                    <audio id="user-audio" controls></audio>
-                </td>
-            </tr>
-            <!-- <tr>
-                <td colspan="2" align="center">
-                    <button><h4>Play!</h4></button>
-                </td>
-            </tr> -->
+        <tr>
+            <td align="right"><b><h3>Mesh</h3></b></td>
+            <td align="center">
+                <input type="file" onchange="loadMeshFile(event)">
+            </td>
+        </tr>
     </table>
+
+    <b><h1 align="center">Audio Settings</h1></b>
+    <table class="table table-bordered">
+        <tr>
+            <td align="right"><b><h3>Mode</h3></b></td>
+            <td align="left">
+                <input type="radio" name="audio_mode" id="a_file" checked> Audio File<br>
+                <input type="radio" name="audio_mode" id="a_user"> User Audio<br>
+            </td>
+        </tr>
+        <tr>
+            <td align="right"><b><h3>Audio</h3></b></td>
+            <td align="center">
+                <input type="file" onchange="loadAudioFile(event)"></h3>
+                <audio id="user-audio" controls></audio>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="w3-container">
+    <button class="w3-btn w3-block w3-black" onclick="w3_open()">☰</button>
+    <h1 align="center">CS 4621 Final Project: <span class="subtitle">WebGL Audio Visualizer</span></h1>
+
+    <div>
+        <canvas tabindex="1" id="webglCanvas" style="border: none; background-color: black;" width="800" height="800"></canvas>
+    </div>
+
 </div>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -67,6 +74,21 @@
 <script src="./webgl.js"></script>
 <script src="./audio.js"></script>
 <script src="./interaction.js"></script>
+<!-- Short script to display and hide the sidebar controls -->
+<script>
+    var canvas = document.getElementById("webglCanvas");
+    canvas.width = document.body.clientWidth - 32; // 16px padding on left and right
+    function w3_open() {
+        document.getElementById("sidebar").style.display = "block";
+    }
+    function w3_close() {
+        document.getElementById("sidebar").style.display = "none";
+    }
+    window.onresize = function() {
+        canvas.width = document.body.clientWidth - 32;
+    }
+</script>
+
 
 <!--*************************************************************************-->
 <!--*************************** VERTEX SHADER *******************************-->
@@ -243,6 +265,7 @@
     }
 
     // sets up the audio nodes, including the analyzer node to perform FFT
+    var canvas = document.getElementById("webglCanvas");
     initializeAudioNodes(0.777);
     var analyzer = null;
 
@@ -280,7 +303,7 @@
         // busy loop to draw to the screen
         function updateWebGL() {
             mat4.lookAt(xf, CAMERA_LOCATION,  [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
-            mat4.perspective(proj, CAMERA_FOV, 800.0/600.0, 0.1, 1000);
+            mat4.perspective(proj, CAMERA_FOV, canvas.width/canvas.height, 0.1, 1000);
             mat4.invert(norm, xf);
             mat4.transpose(norm, norm);
             cam_radians = (cam_radians + 0.05) % (2* Math.PI);
@@ -299,6 +322,7 @@
     }
     // startWebGL();
 </script>
+
 
 </body>
 </html>

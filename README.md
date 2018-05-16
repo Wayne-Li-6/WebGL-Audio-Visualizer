@@ -24,7 +24,7 @@ Current Camera Controls (subject to change):
 - [ ] Parameterize colors and allow user to choose appearance
 - [ ] (IMPORTANT) Figure out double-buffering and bloom-filtering
 - [X] (IMPORTANT) Figure out how to allow user to use built-in microphone to create their own audio that can be visualized
-- [ ] Improve appearance/theme of application (fullscreen? ; move controls to sidebar? ; etc.)
+- [X] Improve appearance/theme of application (fullscreen? ; move controls to sidebar? ; etc.)
 - [ ] Add a default camera animation when the user is idle
 - [ ] See if a skybox/background can be implemented without having a loss in quality due to any Gaussian blurs that we might use
 - [X] Allow more than one mesh per session (currently breaks if a different mesh from the original is uploaded)
@@ -42,6 +42,7 @@ Current Camera Controls (subject to change):
 * May 15, 2018
     * Added animation to the 3 light sources; each light now rotates around the mesh constantly
     * Added additional camera controls for translating towards and away from the mesh using up and down arrow keys, shifted translating upwards/downwards to the page up and page down keys
+    * Improved overall theme of the application; canvas takes up the majority of the screen and settings/controls have been moved to their own sidebar (thanks to w3-css)
 * May 11, 2018
     * Fixed issue with loading different meshes after the first one in the same session
     * Added two new meshes to the assets folder to play around with: `bunny.txt` and `suzanne.txt`
