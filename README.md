@@ -22,7 +22,7 @@ Current Camera Controls (subject to change):
 - [X] Allow user to upload audio (.mp3) file
 - [X] Camera controls using keypresses and mouse
 - [ ] Parameterize colors and allow user to choose appearance
-- [ ] (IMPORTANT) Figure out double-buffering and bloom-filtering
+- [X] (IMPORTANT) Figure out double-buffering and bloom-filtering
 - [X] (IMPORTANT) Figure out how to allow user to use built-in microphone to create their own audio that can be visualized
 - [X] Improve appearance/theme of application (fullscreen? ; move controls to sidebar? ; etc.)
 - [ ] Add a default camera animation when the user is idle
@@ -39,6 +39,8 @@ Current Camera Controls (subject to change):
 `webgl.js` : Anything related to using WebGL to draw. Contains most of the boilerplate code to set up the WebGL context and create, compile, and link the GLSL shaders into a program. Also has functions that set up the various vertex and index buffers. Creates/draws the shapes required by the mesh to the canvas by passing values to the appropriate shaders.
 
 ### Change Log
+* May 16, 2018
+    * Implemented bloom filtering using a Frame Buffer Object and double buffer
 * May 15, 2018
     * Added animation to the 3 light sources; each light now rotates around the mesh constantly
     * Added additional camera controls for translating towards and away from the mesh using up and down arrow keys, shifted translating upwards/downwards to the page up and page down keys
