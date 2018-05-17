@@ -1,0 +1,125 @@
+commit c72d1e08c8ba1a5649f80ee40c67608b2c12b5e7
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Thu May 17 18:10:00 2018 -0400
+
+    Final Report finished
+
+commit 53bb52a29bf66a060ed49c28bfa2ae8dc7cb306f
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Thu May 17 11:51:51 2018 -0400
+
+    Last readme update
+
+commit c22ce34906a8b45e3c42959cfb5894596d8f2906
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Thu May 17 11:50:29 2018 -0400
+
+    Parameterized blur pixel amount and color of edges
+
+commit 7e338fa77b6e445b2568a1cd809b218702655920
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Wed May 16 23:06:24 2018 -0400
+
+    Added final report latex source
+
+commit d21ddd3cc05744432699b9469ec69584a42af871
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Wed May 16 22:11:46 2018 -0400
+
+    Readme
+
+commit 67beb025ab6b537551713a525a649bfcb8a94e88
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Wed May 16 22:09:26 2018 -0400
+
+    Implemented bloom filtering for wiremesh mode
+
+commit 58fbe831a395272afc1cdedb6dfa4513b4e86dc4
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Tue May 15 22:48:32 2018 -0400
+
+    Updated css theme using w3 and moved settings to sidebar
+
+commit 6ff5834ba590917e830e757388985af103b51652
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Tue May 15 21:37:40 2018 -0400
+
+    Updated readme
+
+commit d54ac282ee11a22fda6fd671b0a1da434ced086e
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Tue May 15 21:32:12 2018 -0400
+
+    Added a light source animation & more camera controls
+
+commit a51ebe6096d6c156be0f09612689239537ca4f27
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Sat May 12 00:03:29 2018 -0400
+
+    Removed some unnecessary leftover stuff
+
+commit df2c2162baf8357a916ffef271c077d3cdc1968c
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Sat May 12 00:00:22 2018 -0400
+
+    Updated readme and changelog
+
+commit 05e04b26a04686eda8c5f6613afbffbff58707ea
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Fri May 11 23:50:31 2018 -0400
+
+    Added lights, new meshes, and fixed multiple mesh in one session issue
+
+commit 53628e3ae2f14edfb4dc60932cf82cc870f30f6c
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Mon Apr 30 22:11:05 2018 -0400
+
+    Implemented user-input audio mode
+
+commit 7c0050732d96bd9f0f89f75ff6e4a3090bd33358
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Sun Apr 29 23:47:47 2018 -0400
+
+    Minor change to face mode
+
+commit 66519bcb143441576b52a228a0d4498759bf096c
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Sun Apr 29 23:28:29 2018 -0400
+
+    Reformat md table
+
+commit c5eb554ca89ddab9e0ab776cbdcfe842b2ff5e2f
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Sun Apr 29 23:25:56 2018 -0400
+
+    Format and update the README
+
+commit 0023360a41fff834349d951980e9f5cbded3ced9
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Sun Apr 29 22:32:38 2018 -0400
+
+    Added camera controls, face/edge mode, and new meshes
+
+commit 7e643d78fbd21401006522bcfc62f3a0d157c0dc
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Sat Apr 28 22:53:41 2018 -0400
+
+    Fixed edge generation for mesh and added cube mesh
+
+commit b453b186c92dd46251b3ef34e2626697cc1e99a5
+Author: Wayne Li <wyl6@cornell.edu>
+Date:   Tue Apr 24 22:01:13 2018 -0400
+
+    Brief README update
+
+commit 33611c61917a6de7a5241d46405864e68b874a92
+Author: wyl6 <wyl6@cornell.edu>
+Date:   Tue Apr 24 21:57:08 2018 -0400
+
+    Basic functionality POC
+
+commit de3f399fd645d781b9eeeaa5cb80b4d5215a1dff
+Author: Wayne Li <wyl6@cornell.edu>
+Date:   Tue Apr 24 21:54:14 2018 -0400
+
+    Initial commit
