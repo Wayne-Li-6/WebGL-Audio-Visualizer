@@ -1,3 +1,4 @@
+/** Author: Wayne Li (wyl6) **/
 // An object contatining all of the used Audio Nodes in the graph
 var AUDIO_NODES = {
     audio_ctx: null,

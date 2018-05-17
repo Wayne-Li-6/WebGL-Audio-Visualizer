@@ -1,3 +1,4 @@
+/** Author: Wayne Li (wyl6) **/
 /**
  * Initializes the canvas for a WebGL context the correct way.
  */
