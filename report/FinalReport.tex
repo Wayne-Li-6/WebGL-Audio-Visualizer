@@ -1,0 +1,89 @@
+\documentclass[12pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+%\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+\usepackage{wrapfig}
+\usepackage{amsmath}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+
+\def\ind{\hspace*{0.3in}}
+\def\gap{0.1in}
+\def\bigap{0.25in}
+\newcommand{\Xomit}[1]{}
+
+
+\begin{document}
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.1cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+\begin{center}\framebox{\parbox{\boxlength}{{\bf
+CS 4621, Spring 2018 \hfill Final Project Report}\\
+Wayne Li (wyl6) \hfill Aidan (acf67)}}
+\end{center}
+
+
+{\LARGE \bf WebGL Audio Visualizer}
+
+
+\section{Introduction/Goals}
+
+\section{Instructions to Run}
+In the local directory containing all of the files, run a simple web server using:
+\begin{center}
+	\textbf{python -m SimpleHTTPServer}
+\end{center}
+Then using a web browser of choice such as Chrome, navigate to localhost:8000 and the user interface for the WebGL application should pop up. The page should contain a large, horizontal $\equiv$ button at the top of the screen and also a blank, black canvas. Click on the $\equiv$ button and a sidebar should pop up with display and audio settings. Here you may upload a text file containing in .obj mesh with vertices, vertex normals, and faces in the form of "v//vn" only. The mesh should then pop up on the screen. You will also be allowed to upload an audio .mp3 file to visualize. Or, if you choose the user-input mode, you can visualize the audio that is recorded by your computer's microphone. For the display settings, there is face mode, which displays the faces of the triangle mesh, or edge mode, which displays only the wire mesh.
+
+\section{Description}
+
+\section{Implementation and Technical Details}
+
+\section{Acknowledgments and Resources}
+This application uses and acknowledges the following sources:
+\begin{itemize}
+	\item w3schools for their w3.css file, which is used to design the user interface, including the sidebar
+	\item The Web Audio API library for all of the audio analysis functionality. This includes setting up the audio sources, creating the Audio Node Graph, creating the analyzer node to read in and preform the FFT on the audio source, and examples of how to use the API, etc.
+	\item The glMatrix and JQuery libraries for matrix operations and user interaction, respectively
+	\item "https://github.com/mattdesl/lwjgl-basics/wiki/shaderlesson5" for inspiration in how to set up the fragment shaders that we eventually used for our bloom filter
+	\item Stanford Bunny Mesh: ``https://graphics.stanford.edu/~mdfisher/Data/Meshes/bunny.obj"
+	\item Suzanne Mesh: ``https://github.com/OpenGLInsights/OpenGLInsightsCode/blob/master/\\
+	Chapter\%2026\%20Indexing\%20Multiple\%20Vertex\%20Arrays/article/suzanne.obj"
+	\item Eston Schweickart for his great general advice and assistance
+	\item CS 4261 lecture exhibits for inspiration in setting up our framework and frame buffer objects/double buffers
+\end{itemize}
+
+\end{document}
