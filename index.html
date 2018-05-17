@@ -60,10 +60,9 @@
     <button class="w3-btn w3-block w3-black" onclick="w3_open()">☰</button>
     <h1 align="center">CS 4621 Final Project: <span class="subtitle">WebGL Audio Visualizer</span></h1>
 
-    <div>
-        <canvas tabindex="1" id="webglCanvas" style="border: none; background-color: black;" width="800" height="800"></canvas>
+    <div align="center">
+        <canvas tabindex="1" id="webglCanvas" style="border: none; background-color: black;" width="1024" height="512"></canvas>
     </div>
-
 </div>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -76,19 +75,13 @@
 <script src="./interaction.js"></script>
 <!-- Short script to display and hide the sidebar controls -->
 <script>
-    var canvas = document.getElementById("webglCanvas");
-    canvas.width = document.body.clientWidth - 32; // 16px padding on left and right
     function w3_open() {
         document.getElementById("sidebar").style.display = "block";
     }
     function w3_close() {
         document.getElementById("sidebar").style.display = "none";
     }
-    window.onresize = function() {
-        canvas.width = document.body.clientWidth - 32;
-    }
 </script>
-
 
 <!--*************************************************************************-->
 <!--*************************** VERTEX SHADER *******************************-->
@@ -118,25 +111,87 @@
     }
 </script>
 
-<!--*************************************************************************-->
-<!--************************* FRAGMENT SHADERS ******************************-->
-<!--*************************************************************************-->
-<script id="fragmentShader" type="x-shader/x-fragment">
-    precision highp float;
+<script id="vertexShaderQuad" type="x-shader/x-vertex">
+    attribute vec3 vert_position;
+    attribute vec2 vert_texCoord;
 
-    uniform int isFace;
+    varying vec2 geom_texCoord;
 
     void main() {
-        if (isFace == 1) {
-            gl_FragColor = vec4(1,1,1,1);
-        }
-        else {
-            gl_FragColor = vec4(0.15,0.15,0.9,1);
-        }
+        gl_Position = vec4(vert_position, 1.0);
+        geom_texCoord = vert_texCoord;
     }
 </script>
 
-<script id="fragmentShader02" type="x-shader/x-fragment">
+<!--*************************************************************************-->
+<!--************************* FRAGMENT SHADERS ******************************-->
+<!--*************************************************************************-->
+<script id="fragmentShaderCombine" type="x-shader/x-fragment">
+    precision highp float;
+
+    varying vec2 geom_texCoord;
+
+    uniform sampler2D texture;
+    uniform sampler2D original_texture;
+
+    void main() {
+        vec4 color = texture2D(texture, geom_texCoord);
+        color += texture2D(original_texture, geom_texCoord);
+        gl_FragColor = color;
+    }
+</script>
+
+<script id="fragmentShaderHBlur" type="x-shader/x-fragment">
+    precision highp float;
+
+    varying vec2 geom_texCoord;
+
+    uniform sampler2D texture;
+
+    void main() {
+        vec4 final_color = vec4(0,0,0,1);
+        float pixel = 2.0/1024.;
+
+        final_color += 0.081812 * texture2D(texture, (geom_texCoord - vec2(4.0 * pixel, 0)));
+        final_color += 0.101701 * texture2D(texture, (geom_texCoord - vec2(3.0 * pixel, 0)));
+        final_color += 0.118804 * texture2D(texture, (geom_texCoord - vec2(2.0 * pixel, 0)));
+        final_color += 0.130417 * texture2D(texture, (geom_texCoord - vec2(1.0 * pixel, 0)));
+        final_color += 0.134535 * texture2D(texture, geom_texCoord);
+        final_color += 0.130417 * texture2D(texture, (geom_texCoord + vec2(1.0 * pixel, 0)));
+        final_color += 0.118804 * texture2D(texture, (geom_texCoord + vec2(2.0 * pixel, 0)));
+        final_color += 0.101701 * texture2D(texture, (geom_texCoord + vec2(3.0 * pixel, 0)));
+        final_color += 0.081812 * texture2D(texture, (geom_texCoord + vec2(4.0 * pixel, 0)));
+
+        gl_FragColor = 1.5 * final_color;
+    }
+</script>
+
+<script id="fragmentShaderVBlur" type="x-shader/x-fragment">
+    precision highp float;
+
+    varying vec2 geom_texCoord;
+
+    uniform sampler2D texture;
+
+    void main() {
+        vec4 final_color = vec4(0,0,0,1);
+        float pixel = 2.0/512.;
+
+        final_color += 0.081812 * texture2D(texture, (geom_texCoord - vec2(0, 4.0 * pixel)));
+        final_color += 0.101701 * texture2D(texture, (geom_texCoord - vec2(0, 3.0 * pixel)));
+        final_color += 0.118804 * texture2D(texture, (geom_texCoord - vec2(0, 2.0 * pixel)));
+        final_color += 0.130417 * texture2D(texture, (geom_texCoord - vec2(0, 1.0 * pixel)));
+        final_color += 0.134535 * texture2D(texture, geom_texCoord);
+        final_color += 0.130417 * texture2D(texture, (geom_texCoord + vec2(0, 1.0 * pixel)));
+        final_color += 0.118804 * texture2D(texture, (geom_texCoord + vec2(0, 2.0 * pixel)));
+        final_color += 0.101701 * texture2D(texture, (geom_texCoord + vec2(0, 3.0 * pixel)));
+        final_color += 0.081812 * texture2D(texture, (geom_texCoord + vec2(0, 4.0 * pixel)));
+
+        gl_FragColor = 1.5 * final_color;
+    }
+</script>
+
+<script id="fragmentShaderFace" type="x-shader/x-fragment">
     precision highp float;
 
     uniform int isFace;
@@ -149,9 +204,9 @@
     varying vec4 green_camera;
     varying vec4 blue_camera;
 
-    const vec4 red = vec4(150,0,0,1);
-    const vec4 green = vec4(0,150,0,1);
-    const vec4 blue = vec4(0,0,150,1);
+    const vec4 red = vec4(100,0,0,1);
+    const vec4 green = vec4(0,100,0,1);
+    const vec4 blue = vec4(0,0,100,1);
 
     // shading using Phong model
     vec4 illumination() {
@@ -204,6 +259,7 @@
 <!--**************************** MAIN SCRIPT ********************************-->
 <!--*************************************************************************-->
 <script>
+    var canvas = document.getElementById("webglCanvas");
     function startWebGL(event) {
         runWebGL(loadMeshFile(event));
     }
@@ -211,30 +267,31 @@
     function glEnv(canvas) {
         var gl = initializeWebGL(canvas);
         gl.enable(gl.DEPTH_TEST);
-        var program = createGlslProgram(gl, "vertexShader", "fragmentShader02");
+        var program = createGlslProgram(gl, "vertexShader", "fragmentShaderFace");
+        var blur_h_program = createGlslProgram(gl, "vertexShaderQuad", "fragmentShaderHBlur");
+        var blur_v_program = createGlslProgram(gl, "vertexShaderQuad", "fragmentShaderVBlur");
+        var combine_program = createGlslProgram(gl, "vertexShaderQuad", "fragmentShaderCombine");
         var shape;
-
+        var fbo = gl.createFramebuffer();
+        var double_buffer = createDoubleBuffer(gl, 1024, 512);
+    
         // create the setter functions
         var mesh = {};
         function setMesh(newMesh) {
             mesh = newMesh;
         }
-
         var xf = mat4.create();
         function setXf(newXf) {
             mat4.copy(xf, newXf);
         }
-
         var proj = mat4.create();
         function setProj(newProj) {
             mat4.copy(proj, newProj);
         }
-
         var norm = mat4.create();
         function setNorm(newNorm) {
             mat4.copy(norm, newNorm);
         }
-
         var cam_r = mat4.create();
         function setCam_R(newCam_R) {
             mat4.copy(cam_r, newCam_R);
@@ -242,14 +299,21 @@
 
         function drawFrame(FFTarr) {
             if (mesh == null) { return; }
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
             var transformed_array = transform(mesh, FFTarr);
             shape = createShape(gl, transformed_array[0], transformed_array[1], mesh);
+            
             if (document.getElementById('face').checked){
                 drawShape(gl, program, shape, xf, proj, norm, cam_r, true);
             } else {
-                drawShape(gl, program, shape, xf, proj, norm, cam_r, false);
+                fboBright(gl, fbo, double_buffer, program, shape, xf, proj, norm, cam_r, false, 0);
+                fboBright(gl, fbo, double_buffer, program, shape, xf, proj, norm, cam_r, false, 1);
+                double_buffer.swap();
+                fboBlur(gl, fbo, double_buffer, blur_v_program);
+                double_buffer.swap();
+                fboBlur(gl, fbo, double_buffer, blur_h_program);
+                double_buffer.swap();
+                createAndDrawFullScreenQuad(gl, combine_program, double_buffer.getReadBuffer(), double_buffer.getOriginal(), true);
             }
         }
 
@@ -265,7 +329,6 @@
     }
 
     // sets up the audio nodes, including the analyzer node to perform FFT
-    var canvas = document.getElementById("webglCanvas");
     initializeAudioNodes(0.777);
     var analyzer = null;
 
