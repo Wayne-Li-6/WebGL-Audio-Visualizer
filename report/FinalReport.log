@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6400) (preloaded format=pdflatex 2018.1.28)  16 MAY 2018 23:06
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6400) (preloaded format=pdflatex 2018.1.28)  17 MAY 2018 18:09
 entering extended mode
 **./FinalReport.tex
 (FinalReport.tex
@@ -555,44 +555,55 @@ G,.JBIG2,.JB2,.eps]
 )
 ABD: EveryShipout initializing macros
 \boxlength=\skip55
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 78.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\omscmr.fd"
-File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 78.
-
-Overfull \hbox (1.85034pt too wide) in paragraph at lines 82--83
-[]\OT1/cmr/m/n/12 Stanford Bunny Mesh: ``https://graphics.stanford.edu/ md-fis-
-her/Data/Meshes/bunny.obj" 
+Overfull \hbox (11.8676pt too wide) in paragraph at lines 70--70
+[]\OT1/cmr/bx/n/17.28 Description and Re-la-tion to Areas of Com-pu-ter Graphic
+s 
  []
 
 
-Overfull \hbox (3.63924pt too wide) in paragraph at lines 83--85
-[]\OT1/cmr/m/n/12 Suzanne Mesh: ``https://github.com/OpenGLInsights/OpenGLInsig
-htsCode/blob/master/ 
+Underfull \hbox (badness 10000) in paragraph at lines 74--76
+
  []
 
 [1
 
 {C:/Users/wayne_000/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
-[2] (FinalReport.aux) ) 
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 76.
+
+("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\omscmr.fd"
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 76.
+ [2] [3]
+Overfull \hbox (1.85034pt too wide) in paragraph at lines 124--125
+[]\OT1/cmr/m/n/12 Stanford Bunny Mesh: ``https://graphics.stanford.edu/ md-fis-
+her/Data/Meshes/bunny.obj" 
+ []
+
+
+Overfull \hbox (3.63924pt too wide) in paragraph at lines 125--127
+[]\OT1/cmr/m/n/12 Suzanne Mesh: ``https://github.com/OpenGLInsights/OpenGLInsig
+htsCode/blob/master/ 
+ []
+
+[4] (FinalReport.aux) ) 
 Here is how much of TeX's memory you used:
- 12535 strings out of 493352
- 246765 string characters out of 3137156
- 285968 words of memory out of 3000000
- 15818 multiletter control sequences out of 15000+200000
- 8569 words of font info for 31 fonts, out of 3000000 for 9000
+ 12537 strings out of 493352
+ 246798 string characters out of 3137156
+ 286968 words of memory out of 3000000
+ 15820 multiletter control sequences out of 15000+200000
+ 9174 words of font info for 33 fonts, out of 3000000 for 9000
  1127 hyphenation exceptions out of 8191
- 55i,6n,54p,863b,179s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 55i,6n,54p,1233b,162s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/am
 sfonts/cm/cmbx12.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsf
 onts/cm/cmr12.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfont
 s/cm/cmsy10.pfb>
-Output written on FinalReport.pdf (2 pages, 49074 bytes).
+Output written on FinalReport.pdf (4 pages, 59733 bytes).
 PDF statistics:
- 24 PDF objects out of 1000 (max. 8388607)
+ 30 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 
