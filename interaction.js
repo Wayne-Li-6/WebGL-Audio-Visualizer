@@ -85,6 +85,26 @@ function createMesh(text) {
         vertex_to_normal: vertex_to_normal
     };
 }
+// Number of pixels to blur by (the range of the blur essentially)
+var BLUR_AMOUNT = 3;
+// Color of the wiremesh in edge mode display
+var E_COLOR = [1.0, 1.0, 1.0];
+
+function changeBlur(event) {
+    var number = parseInt(event.target.value);
+    BLUR_AMOUNT = number;
+}
+
+function changeColor(event) {
+    var hex = event.target.value;
+    var arr = hex.split('');
+    var r = arr[1] + arr[2];
+    var g = arr[3] + arr[4];
+    var b = arr[5] + arr[6];
+    E_COLOR[0] = parseInt(r, 16) / 255.0;
+    E_COLOR[1] = parseInt(g, 16) / 255.0;
+    E_COLOR[2] = parseInt(b, 16) / 255.0;
+}
 
 // Current position of the camera in 3D space
 var CAMERA_LOCATION = vec3.fromValues(0.0, 1.0, 3.0);
@@ -169,3 +189,4 @@ $("#webglCanvas").on("wheel", function(wheel) {
     }
     return false;
 });
+

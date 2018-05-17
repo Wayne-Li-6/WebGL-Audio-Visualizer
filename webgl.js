@@ -102,6 +102,8 @@ function createAndDrawFullScreenQuad(gl, program, texture, original_texture, com
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, original_texture);
         gl.uniform1i(gl.getUniformLocation(program, "original_texture"), 1);
+    } else {
+        gl.uniform1f(gl.getUniformLocation(program, "blur"), BLUR_AMOUNT);
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -202,6 +204,7 @@ function drawShape(gl, program, shape, xf, proj, norm, cam_r, face_mode) {
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projection"), false, proj);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "normal"), false, norm);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "cameraRotation"), false, cam_r);
+    gl.uniform3f(gl.getUniformLocation(program, "e_color"), E_COLOR[0], E_COLOR[1], E_COLOR[2]);
 
     gl.useProgram(null);
 }

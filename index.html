@@ -17,9 +17,9 @@
 </head>
 <body>
 <div class="w3-sidebar w3-bar-block" style="width:25%; display:none" id="sidebar"> 
-    <button onclick="w3_close()" class="w3-bar-item w3-large">Close &times;</button>
-    <b><h1 align="center">Display Settings</h1></b>
-
+    <button onclick="w3_close()" class="w3-bar-item w3-padding-small">Close &times;</button>
+    
+    <b><h3 align="center">Display Settings</h3></b>
     <table class="table table-bordered">
         <tr> 
             <td align="right"><b><h3>Mode</h3></b></td>
@@ -37,7 +37,7 @@
         </tr>
     </table>
 
-    <b><h1 align="center">Audio Settings</h1></b>
+    <b><h3 align="center">Audio Settings</h3></b>
     <table class="table table-bordered">
         <tr>
             <td align="right"><b><h3>Mode</h3></b></td>
@@ -49,10 +49,36 @@
         <tr>
             <td align="right"><b><h3>Audio</h3></b></td>
             <td align="center">
-                <input type="file" onchange="loadAudioFile(event)"></h3>
+                <input type="file" onchange="loadAudioFile(event)">
                 <audio id="user-audio" controls></audio>
             </td>
         </tr>
+    </table>
+
+    <b><h3 align="center">Bloom Filter</h3></b>
+    <table class="table table-bordered">
+        <tr>
+            <td align="right"><b><h3>Blur</h3></b></td>
+            <td align="left">
+                <input id="blur" type="range" min="1" max="5" step="1" 
+                    list="tickmarks" onchange="changeBlur(event)">
+
+                <datalist id="tickmarks">
+                    <option value="1">
+                    <option value="2">
+                    <option value="3">
+                    <option value="4">
+                    <option value="5">
+                </datalist>
+            </td>
+        </tr>
+        <tr>
+            <td align="right"><b><h3>Color</h3></b></td>
+            <td align="center">
+                <input id="color" type="color" value="#ffffff" onchange="changeColor(event)">
+            </td>
+        </tr>
+
     </table>
 </div>
 
@@ -147,10 +173,11 @@
     varying vec2 geom_texCoord;
 
     uniform sampler2D texture;
+    uniform float blur;
 
     void main() {
         vec4 final_color = vec4(0,0,0,1);
-        float pixel = 2.0/1024.;
+        float pixel = blur/1024.;
 
         final_color += 0.081812 * texture2D(texture, (geom_texCoord - vec2(4.0 * pixel, 0)));
         final_color += 0.101701 * texture2D(texture, (geom_texCoord - vec2(3.0 * pixel, 0)));
@@ -172,10 +199,11 @@
     varying vec2 geom_texCoord;
 
     uniform sampler2D texture;
+    uniform float blur;
 
     void main() {
         vec4 final_color = vec4(0,0,0,1);
-        float pixel = 2.0/512.;
+        float pixel = blur/512.;
 
         final_color += 0.081812 * texture2D(texture, (geom_texCoord - vec2(0, 4.0 * pixel)));
         final_color += 0.101701 * texture2D(texture, (geom_texCoord - vec2(0, 3.0 * pixel)));
@@ -195,7 +223,7 @@
     precision highp float;
 
     uniform int isFace;
-    uniform vec3 camera_loc;
+    uniform vec3 e_color;
 
     varying vec4 v_position;
     varying vec3 v_normal;
@@ -250,7 +278,7 @@
             gl_FragColor = illumination();
         }
         else {
-            gl_FragColor = vec4(1,1,1,1);
+            gl_FragColor = vec4(e_color,1);
         }
     }
 </script>
