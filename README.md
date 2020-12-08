@@ -1,7 +1,14 @@
 # CS 4621 Final Project
 ## WebGL Audio Visualizer
 
-Instructions: Run `python -m SimpleHTTPServer`  
+<p align="center">
+  <img src="https://github.com/Wayne-Li-6/WebGL-Audio-Visualizer/tree/master/assets/demo.gif" alt="animated" />
+</p>
+
+Instructions: 
+1. Clone the repository
+2. In local directory, run `python -m http.server` (Python3)
+
 Current Camera Controls (subject to change):
 
 | Input | Response |
@@ -39,6 +46,9 @@ Current Camera Controls (subject to change):
 `webgl.js` : Anything related to using WebGL to draw. Contains most of the boilerplate code to set up the WebGL context and create, compile, and link the GLSL shaders into a program. Also has functions that set up the various vertex and index buffers. Creates/draws the shapes required by the mesh to the canvas by passing values to the appropriate shaders.
 
 ### Change Log
+* December 7, 2020
+    * Fixed audio context not starting automatically
+    * Updated `README.md` with demo gif
 * May 17, 2018
     * Parameterized edge color choice for the user
     * Parameterized the number of pixels to blur by (effectively the range) for the bloom filter

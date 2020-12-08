@@ -77,3 +77,10 @@ function getNormalizedFFT(analyzer) {
     }
     return FFT;
 }
+/**
+ * Add a callback function when user clicks the page to resume audio context
+ * since Chrome does not allow autoplay anymore
+ */
+document.getElementById("webglCanvas").addEventListener('click', function() {
+    AUDIO_NODES.audio_ctx.resume();
+});
