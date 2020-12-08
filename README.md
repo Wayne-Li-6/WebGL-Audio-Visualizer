@@ -1,9 +1,9 @@
 # CS 4621 Final Project
 ## WebGL Audio Visualizer
 
-<p align="center">
-  <img src="https://github.com/Wayne-Li-6/WebGL-Audio-Visualizer/tree/master/assets/demo.gif" alt="animated" />
-</p>
+![Sorry!](demo.gif)
+
+---
 
 Instructions: 
 1. Clone the repository
