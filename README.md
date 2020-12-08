@@ -1,7 +1,7 @@
 # CS 4621 Final Project
 ## WebGL Audio Visualizer
 
-![Sorry!](demo.gif)
+![Sorry!](./assets/demo.gif)
 
 ---
 
